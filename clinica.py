@@ -29,6 +29,12 @@ class Clinica:
                 return historia
         raise PacienteNoEncontradoError("No se encontró la historia clínica para el paciente.")
 
+    def buscar_historia_por_dni(self, dni):
+        for historia in self.historias_clinicas:
+            if historia.paciente.obtener_dni() == dni:
+                return historia
+        raise HistoriaClinicaNoEncontradaError("No se encontró la historia clínica para el paciente.")
+
     def eliminar_historia_clinica(self, paciente):
         for historia in self.historias_clinicas:
             if historia.paciente == paciente:
@@ -65,18 +71,25 @@ class Clinica:
         self.turnos.append(turno)
         historia.agregar_turno(turno)
 
+    def agendar_turno_por_dni(self, dni, matricula_medico, fecha_hora):
+        paciente = next((h.paciente for h in self.historias_clinicas if h.paciente.obtener_dni() == dni), None)
+        if not paciente:
+            raise PacienteNoEncontradoError("Paciente no encontrado.")
+        self.agendar_turno(paciente, matricula_medico, fecha_hora)
+
     def emitir_receta(self, paciente, descripcion):
         historia = self.buscar_historia_por_paciente(paciente)
-        medico = None
-
         if not self.medicos:
             raise RecetaInvalidaException("No hay médicos registrados para emitir receta.")
-
-        # Solo para prueba, tomamos al primer médico
         medico = self.medicos[0]
-
         receta = Receta(paciente, medico, datetime.now(), [descripcion])
         historia.agregar_entrada(medico, "Receta emitida", [receta])
+
+    def emitir_receta_por_dni(self, dni, descripcion):
+        paciente = next((h.paciente for h in self.historias_clinicas if h.paciente.obtener_dni() == dni), None)
+        if not paciente:
+            raise PacienteNoEncontradoError("Paciente no encontrado.")
+        self.emitir_receta(paciente, descripcion)
 
     def buscar_medico_por_matricula(self, matricula):
         for m in self.medicos:

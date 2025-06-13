@@ -1,3 +1,4 @@
+
 from datetime import datetime
 from clinica import Clinica
 from paciente import Paciente
@@ -112,11 +113,6 @@ class CLI:
                 if dni.lower() == "cancelar":
                     print("Operación cancelada.")
                     return
-                fecha_nac = input("Fecha de nacimiento (DD/MM/AAAA) (o 'cancelar' para volver): ").strip()
-                if fecha_nac.lower() == "cancelar":
-                    print("Operación cancelada.")
-                    return
-                paciente = Paciente("temp", dni, fecha_nac)
                 medico_matricula = input("Matrícula del médico (o 'cancelar' para volver): ").strip()
                 if medico_matricula.lower() == "cancelar":
                     print("Operación cancelada.")
@@ -130,7 +126,7 @@ class CLI:
                 except ValueError:
                     print("Formato de fecha y hora inválido. Use DD/MM/AAAA HH:MM.")
                     continue
-                self.clinica.agendar_turno(paciente, medico_matricula, fecha_dt)
+                self.clinica.agendar_turno_por_dni(dni, medico_matricula, fecha_dt)
                 print("Turno agendado con éxito.")
                 break
             except TurnoOcupadoError as e:
@@ -181,16 +177,11 @@ class CLI:
                 if dni.lower() == "cancelar":
                     print("Operación cancelada.")
                     return
-                fecha_nac = input("Fecha de nacimiento (DD/MM/AAAA) (o 'cancelar' para volver): ").strip()
-                if fecha_nac.lower() == "cancelar":
-                    print("Operación cancelada.")
-                    return
-                paciente = Paciente("temp", dni, fecha_nac)
                 descripcion = input("Descripción de la receta (o 'cancelar' para volver): ").strip()
                 if descripcion.lower() == "cancelar":
                     print("Operación cancelada.")
                     return
-                self.clinica.emitir_receta(paciente, descripcion)
+                self.clinica.emitir_receta_por_dni(dni, descripcion)
                 print("Receta emitida con éxito.")
                 break
             except RecetaInvalidaException as e:
@@ -202,10 +193,8 @@ class CLI:
 
     def ver_historia_clinica(self):
         dni = input("DNI del paciente: ").strip()
-        fecha_nac = input("Fecha de nacimiento (DD/MM/AAAA): ").strip()
-        paciente = Paciente("temp", dni, fecha_nac)
         try:
-            historia = self.clinica.buscar_historia_por_paciente(paciente)
+            historia = self.clinica.buscar_historia_por_dni(dni)
             print(historia)
         except HistoriaClinicaNoEncontradaError as e:
             print(f"Error: {e}")
